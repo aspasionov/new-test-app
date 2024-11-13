@@ -7,6 +7,18 @@ type Props = {
   className?: string;
 };
 
+type Locale = {
+  code: string;
+  name: string;
+  default: boolean;
+  fallbackCode: string | null;
+  sys: {
+    id: string;
+    type: 'Locale';
+    version: number;
+  };
+};
+
 const getData = async () => {
   const { items } = await client.getLocales();
   return items;
@@ -16,7 +28,7 @@ export const Dropdown = ({ className }: Props) => {
   const searchParams = useSearchParams();
   const locale = searchParams.get('locale');
   const router = useRouter();
-  const [data, setData] = useState([]);
+  const [data, setData] = useState<Locale[]>([]);
   const handleSelect = (event: React.ChangeEvent<HTMLSelectElement>) => {
     router.push(`/?locale=${event.target.value}`);
   };
