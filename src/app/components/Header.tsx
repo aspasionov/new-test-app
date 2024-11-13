@@ -15,7 +15,7 @@ type Link = {
   href: string;
 };
 
-const getData = async (locale: string | undefined) => {
+const getData = async (locale: string | null) => {
   const data = await client.getEntries({
     content_type: 'header',
     locale: locale || 'uk'
@@ -26,7 +26,7 @@ const getData = async (locale: string | undefined) => {
 export const Header = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [loading, setLoading] = useState(true);
-  const [links, setLinks] = useState([]);
+  const [links, setLinks] = useState<Link[]>([]);
   const [btnText, setBtnText] = useState('');
   const searchParams = useSearchParams();
   const locale = searchParams.get('locale');
@@ -35,11 +35,11 @@ export const Header = () => {
     setLoading(true);
     getData(locale)
       .then((data) => {
-        const links: Link[] = data.items[0].fields.items.map((item) => {
+        const links: Link[] = data?.items?.[0]?.fields?.items?.map((item) => {
           return item.fields;
         });
         setLinks(links);
-        setBtnText(data.items[0].fields.button);
+        setBtnText(data.items[0].fields.button as string);
       })
       .finally(() => {
         setLoading(false);
