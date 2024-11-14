@@ -3,17 +3,36 @@ import { useState, useEffect } from 'react';
 import { client } from '@/contentful';
 import { useSearchParams } from 'next/navigation';
 
-const getData = async (locale: string | undefined) => {
+
+function parseContent(
+  content?: Record<string, any>
+): Record<string, any> | null {
+  if (!content) {
+    return null;
+  }
+
+  return {
+    title: content.fields.title || '',
+    subtitle: content.fields.subtitle || ''
+  };
+}
+
+const getData = async (locale: string | undefined): Promise<any[]> => {
   const data = await client.getEntries({
     content_type: 'main',
     locale: locale || 'uk'
   });
 
-  return data;
+  return data.items.map(parseContent) as any;
+};
+
+type DataT = {
+  title: string;
+  subtitle: string;
 };
 
 export default function Home() {
-  const [data, setData] = useState({
+  const [data, setData] = useState<DataT>({
     title: '',
     subtitle: ''
   });
@@ -22,7 +41,7 @@ export default function Home() {
 
   useEffect(() => {
     getData(locale).then((data) => {
-      setData(data.items[0].fields);
+      setData(data[0]);
     });
   }, [locale]);
 

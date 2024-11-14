@@ -1,4 +1,5 @@
 'use client';
+import type { TypeHeaderSkeleton, TypeHeaderFields } from '@/contentful/types';
 import { useEffect, useState } from 'react';
 import { client } from '@/contentful';
 import { Preloader } from '@/app/components/Preloader';
@@ -15,19 +16,53 @@ type Link = {
   href: string;
 };
 
-const getData = async (locale: string | null) => {
-  const data = await client.getEntries({
+type DataType = {
+  button: string;
+  home: string;
+  items: Link[];
+};
+
+function parseLinks(link?: Record<string, any>): Record<string, any> | null {
+  if (!link) {
+    return null;
+  }
+  return {
+    id: link.fields.id || +new Date(),
+    text: link.fields.text || '',
+    href: link.fields.href || ''
+  };
+}
+
+function parseContent(
+  content?: Record<string, any>
+): Record<string, any> | null {
+  if (!content) {
+    return null;
+  }
+
+  return {
+    button: content.fields.button || '',
+    home: content.fields.home || '',
+    items: content.fields.items?.map(parseLinks) || []
+  };
+}
+
+const getData = async (locale: string | null): Promise<any[]> => {
+  const data = await client.getEntries<TypeHeaderSkeleton>({
     content_type: 'header',
     locale: locale || 'uk'
   });
-  return data;
+  return data.items.map((item) => parseContent(item) as TypeHeaderFields);
 };
 
 export const Header = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [loading, setLoading] = useState(true);
-  const [links, setLinks] = useState<Link[]>([]);
-  const [btnText, setBtnText] = useState('');
+  const [data, setData] = useState<DataType>({
+    button: '',
+    home: '',
+    items: []
+  });
   const searchParams = useSearchParams();
   const locale = searchParams.get('locale');
 
@@ -35,11 +70,7 @@ export const Header = () => {
     setLoading(true);
     getData(locale)
       .then((data) => {
-        const links: Link[] = data?.items?.[0]?.fields?.items?.map((item) => {
-          return item.fields;
-        });
-        setLinks(links);
-        setBtnText(data.items[0].fields.button as string);
+        setData(data[0]);
       })
       .finally(() => {
         setLoading(false);
@@ -47,7 +78,6 @@ export const Header = () => {
   }, [locale]);
 
   if (loading) return <Preloader />;
-
   return (
     <header className="h-[70px] py-2 relative z-10">
       <div className="container flex items-center justify-between mx-auto">
@@ -78,7 +108,7 @@ export const Header = () => {
               className="w-6 h-6"
               viewBox="0 0 24 24"
               fill="none"
-              stroke="currentColor"
+              stroke="white"
               strokeWidth="2"
               strokeLinecap="round"
               strokeLinejoin="round"
@@ -87,7 +117,7 @@ export const Header = () => {
               <line x1="6" y1="6" x2="18" y2="18" />
             </svg>
           </button>
-          {links.map((link) => (
+          {data.items.map((link) => (
             <Link
               key={link.id}
               href={link.href}
@@ -99,7 +129,7 @@ export const Header = () => {
         </nav>
         <div className="flex">
           <Dropdown className="mr-4" />
-          <Button>{btnText}</Button>
+          <Button>{data.button}</Button>
           <button
             type="button"
             className="ml-4 md:hidden"
