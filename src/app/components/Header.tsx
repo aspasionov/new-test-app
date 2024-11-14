@@ -56,7 +56,6 @@ const getData = async (locale: string | null): Promise<any[]> => {
 
 export const Header = () => {
   const [isOpen, setIsOpen] = useState(false);
-  const [loading, setLoading] = useState(true);
   const [data, setData] = useState<DataType>({
     button: '',
     home: '',
@@ -66,14 +65,9 @@ export const Header = () => {
   const locale = searchParams.get('locale');
 
   useEffect(() => {
-    setLoading(true);
-    getData(locale)
-      .then((data) => {
-        setData(data[0]);
-      })
-      .finally(() => {
-        setLoading(false);
-      });
+    getData(locale).then((data) => {
+      setData(data[0]);
+    });
   }, [locale]);
   return (
     <header className="h-[70px] py-2 relative z-10">
