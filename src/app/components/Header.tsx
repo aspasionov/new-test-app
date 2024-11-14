@@ -2,7 +2,6 @@
 import type { TypeHeaderSkeleton, TypeHeaderFields } from '@/contentful/types';
 import { useEffect, useState } from 'react';
 import { client } from '@/contentful';
-import { Preloader } from '@/app/components/Preloader';
 import { useSearchParams } from 'next/navigation';
 
 import Link from 'next/link';
@@ -76,8 +75,6 @@ export const Header = () => {
         setLoading(false);
       });
   }, [locale]);
-
-  if (loading) return <Preloader />;
   return (
     <header className="h-[70px] py-2 relative z-10">
       <div className="container flex items-center justify-between mx-auto">
@@ -140,7 +137,7 @@ export const Header = () => {
               xmlns="http://www.w3.org/2000/svg"
               fill="none"
               viewBox="0 0 24 24"
-              stroke="currentColor"
+              stroke="white"
             >
               <path
                 strokeLinecap="round"
